@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -10,20 +11,38 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "SamCar Rental Lucena PH — Affordable & Reliable Car Rental",
+  title: "SamCar Rental Lucena PH — Premium Car Rental",
   description:
-    "Browse and book well-maintained rental cars in Lucena City, Quezon Province, Philippines. Sedans, SUVs, and vans available for daily rental.",
+    "Premium, well-maintained car rental in Lucena City, Quezon Province. Sedans, SUVs, MPVs, and vans available with easy online booking.",
 };
+
+/* Inline pre-hydration script — applies stored theme before paint to avoid flash. */
+const themeInitScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('theme') || 'dark';
+    if (t === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  } catch(e) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+`;
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} h-full antialiased`}>
+    <html lang="en" className={`${geist.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Header />
-        {children}
-        <Footer />
+        <ThemeProvider>
+          <Header />
+          {children}
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

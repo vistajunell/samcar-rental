@@ -1,5 +1,19 @@
 import Link from "next/link";
-import { Car, Phone, Mail, MapPin } from "lucide-react";
+import Image from "next/image";
+import { Phone, Mail, MapPin } from "lucide-react";
+
+const quickLinks = [
+  { label: "Home", href: "/" },
+  { label: "Cars", href: "/cars" },
+  { label: "How it Works", href: "/#how-it-works" },
+  { label: "Availability", href: "/availability" },
+];
+const companyLinks = [
+  { label: "About Us", href: "/#about" },
+  { label: "Contact", href: "/#contact" },
+  { label: "Privacy Policy", href: "#" },
+  { label: "Terms of Service", href: "#" },
+];
 
 function IconFacebook() {
   return (
@@ -19,42 +33,39 @@ function IconInstagram() {
   );
 }
 
-const quickLinks = ["Home", "Browse Cars", "How It Works", "Rates", "Availability"];
-const companyLinks = ["About Us", "Contact", "Privacy Policy", "Terms of Service"];
-
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 dark:bg-black text-white">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-gray-950 dark:bg-black text-white border-t border-white/10">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* ── Brand ── */}
           <div>
-            <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-red">
-                <Car className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-sm font-black tracking-tight">SamCar</span>
-                <span className="text-[9px] font-semibold text-brand-red tracking-[0.15em] uppercase">
-                  Rental Lucena
-                </span>
+            <Link href="/" className="inline-block mb-4">
+              <div className="relative h-14 w-[150px]">
+                <Image
+                  src="/images/logo/samcar-logo.webp"
+                  alt="SamCar Rental Lucena PH"
+                  fill
+                  sizes="150px"
+                  className="object-contain object-left"
+                />
               </div>
             </Link>
-            <p className="text-sm text-gray-400 leading-relaxed mb-5">
-              Affordable and reliable car rental in Lucena City, Quezon Province, Philippines.
+            <p className="text-sm text-gray-400 leading-relaxed mb-5 max-w-xs">
+              Premium and reliable car rental service in Lucena City, Quezon Province, Philippines.
             </p>
             <div className="flex gap-2">
               <a
                 href="#"
                 aria-label="Facebook"
-                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-brand-red flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-brand-red flex items-center justify-center transition-colors"
               >
                 <IconFacebook />
               </a>
               <a
                 href="#"
                 aria-label="Instagram"
-                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-brand-red flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-brand-red flex items-center justify-center transition-colors"
               >
                 <IconInstagram />
               </a>
@@ -66,14 +77,14 @@ export default function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">
               Quick Links
             </h4>
-            <ul className="space-y-2">
-              {quickLinks.map((label) => (
-                <li key={label}>
+            <ul className="space-y-2.5">
+              {quickLinks.map((link) => (
+                <li key={link.label}>
                   <Link
-                    href="#"
+                    href={link.href}
                     className="text-sm text-gray-400 hover:text-brand-red transition-colors"
                   >
-                    {label}
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -82,17 +93,15 @@ export default function Footer() {
 
           {/* ── Company ── */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">
-              Company
-            </h4>
-            <ul className="space-y-2">
-              {companyLinks.map((label) => (
-                <li key={label}>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">Company</h4>
+            <ul className="space-y-2.5">
+              {companyLinks.map((link) => (
+                <li key={link.label}>
                   <Link
-                    href="#"
+                    href={link.href}
                     className="text-sm text-gray-400 hover:text-brand-red transition-colors"
                   >
-                    {label}
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -101,9 +110,7 @@ export default function Footer() {
 
           {/* ── Contact ── */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">
-              Contact
-            </h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">Contact</h4>
             <div className="space-y-3">
               <div className="flex items-start gap-2.5">
                 <MapPin className="h-4 w-4 text-brand-red mt-0.5 shrink-0" />
@@ -123,11 +130,11 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* ── Centered copyright ── */}
+        <div className="mt-12 pt-8 border-t border-white/10 text-center">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} SamCar Rental Lucena PH. All rights reserved.
+            © 2026 SamCar Rental Lucena PH. All rights reserved.
           </p>
-          <p className="text-xs text-gray-600">Built with Next.js · Phase 1</p>
         </div>
       </div>
     </footer>

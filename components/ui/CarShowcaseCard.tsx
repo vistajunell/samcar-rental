@@ -1,24 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ChevronLeft, ChevronRight, Users, Zap, Fuel } from "lucide-react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight, Users, Cog, Fuel } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { featuredCars } from "@/lib/data/cars";
 
-const carEmojis: Record<string, string> = {
-  "1": "🚗",
-  "2": "🚙",
-  "3": "🚐",
-  "4": "🛻",
-  "5": "🚌",
-  "6": "🚗",
-};
-
 const statusStyle: Record<string, string> = {
-  Available: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  Booked: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-  Maintenance: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+  Available: "bg-green-500/15 text-green-300 border-green-500/40",
+  Booked: "bg-red-500/20 text-red-300 border-red-500/40",
+  Maintenance: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
 };
 
 export default function CarShowcaseCard() {
@@ -36,16 +27,61 @@ export default function CarShowcaseCard() {
   const next = () => go((index + 1) % total);
 
   const variants = {
-    enter: (d: number) => ({ x: d * 50, opacity: 0 }),
+    enter: (d: number) => ({ x: d * 80, opacity: 0 }),
     center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: -d * 50, opacity: 0 }),
+    exit: (d: number) => ({ x: -d * 80, opacity: 0 }),
   };
 
   return (
-    /* Outer wrapper — provides space above card for the overflow image */
-    <div className="relative w-full max-w-[290px] mx-auto pt-12">
-      {/* ── Floating car visual — overflows above the card ── */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[230px] h-[90px] z-10 pointer-events-none">
+    <div className="relative w-full h-[520px]">
+      {/* ── Top: counter + status ── */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-2">
+        <span
+          className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md ${statusStyle[car.status]}`}
+        >
+          {car.status}
+        </span>
+        <span className="text-[11px] font-semibold text-gray-300 tabular-nums tracking-wider">
+          {String(index + 1).padStart(2, "0")}
+          <span className="text-gray-500 mx-0.5">/</span>
+          {String(total).padStart(2, "0")}
+        </span>
+      </div>
+
+      {/* ── Brand + name (above car) ── */}
+      <div className="absolute top-10 left-0 right-0 z-20 text-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${car.id}-name`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.35 }}
+          >
+            <p className="text-[11px] text-brand-red font-bold uppercase tracking-[0.25em]">
+              {car.brand} · {car.year}
+            </p>
+            <h3 className="mt-1.5 text-3xl xl:text-4xl font-black text-white leading-tight tracking-tight">
+              {car.name}
+            </h3>
+            <p className="mt-1 text-xs text-gray-400 italic">{car.tagline}</p>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* ── Car image stage with podium glow ── */}
+      <div className="absolute top-32 left-0 right-0 bottom-44 flex items-center justify-center px-2">
+        {/* Red ring spotlight behind car */}
+        <div
+          aria-hidden
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] rounded-full bg-brand-red/[0.12] blur-3xl animate-pulse-glow"
+        />
+        {/* Podium ellipse glow */}
+        <div
+          aria-hidden
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[72%] h-3 rounded-full bg-brand-red/40 blur-2xl"
+        />
+
         <AnimatePresence mode="wait" custom={dir}>
           <motion.div
             key={car.id}
@@ -54,109 +90,93 @@ export default function CarShowcaseCard() {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.28, ease: "easeInOut" }}
-            className="w-full h-full rounded-xl flex flex-col items-center justify-center relative overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, ${car.cardColor}f0, ${car.cardColor}88)`,
-              boxShadow: `0 8px 32px ${car.cardColor}55`,
-            }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full h-full"
           >
-            <span className="text-4xl leading-none">{carEmojis[car.id]}</span>
-            <span className="text-white/60 text-[10px] font-semibold mt-1 tracking-wide">
-              {car.name}
-            </span>
+            <Image
+              src={car.image}
+              alt={`${car.brand} ${car.name}`}
+              fill
+              priority
+              sizes="(min-width: 1024px) 600px, 100vw"
+              className="object-contain drop-shadow-[0_28px_30px_rgba(0,0,0,0.65)]"
+            />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* ── Card body ── */}
-      <div className="rounded-2xl bg-white dark:bg-[#111111] border border-gray-100 dark:border-white/10 shadow-2xl pt-14 pb-5 px-5">
-        {/* Status + counter */}
-        <div className="flex items-center justify-between mb-3">
-          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusStyle[car.status]}`}>
-            {car.status}
-          </span>
-          <span className="text-[11px] text-gray-400 dark:text-gray-500">
-            {index + 1} / {total}
-          </span>
-        </div>
+      {/* ── Side arrows ── */}
+      <button
+        onClick={prev}
+        aria-label="Previous car"
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-brand-red text-white border border-white/20 hover:border-brand-red backdrop-blur-md flex items-center justify-center transition-all hover:scale-110"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        onClick={next}
+        aria-label="Next car"
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-brand-red text-white border border-white/20 hover:border-brand-red backdrop-blur-md flex items-center justify-center transition-all hover:scale-110"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
 
-        {/* Name + price */}
-        <div className="text-center">
-          <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">{car.tagline}</p>
-          <h3 className="text-base font-black text-gray-900 dark:text-white leading-tight">
-            {car.name}
-          </h3>
-          <div className="mt-1.5">
-            <span className="text-2xl font-black text-brand-red">
-              ₱{car.pricePerDay.toLocaleString()}
-            </span>
-            <span className="text-xs text-gray-400 ml-1">/ day</span>
-          </div>
-        </div>
-
-        {/* Specs */}
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {[
-            { Icon: Users, value: `${car.seats}`, label: "Seats" },
-            { Icon: Zap, value: car.transmission === "Automatic" ? "Auto" : "Manual", label: "Trans." },
-            { Icon: Fuel, value: car.fuelType, label: "Fuel" },
-          ].map(({ Icon, value, label }) => (
-            <div
-              key={label}
-              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-gray-50 dark:bg-white/5"
-            >
-              <Icon className="h-3.5 w-3.5 text-brand-red" />
-              <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 text-center leading-tight">
-                {value}
-              </span>
-              <span className="text-[10px] text-gray-400">{label}</span>
+      {/* ── Bottom: specs + price + dots ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        {/* Specs row */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${car.id}-specs`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35 }}
+          >
+            <div className="flex items-center justify-center gap-5 mb-3 text-white">
+              <div className="flex items-center gap-1.5 text-xs">
+                <Users className="h-3.5 w-3.5 text-brand-red" />
+                <span className="font-semibold">{car.seats}</span>
+                <span className="text-gray-400">seats</span>
+              </div>
+              <span className="w-1 h-1 rounded-full bg-white/30" />
+              <div className="flex items-center gap-1.5 text-xs">
+                <Cog className="h-3.5 w-3.5 text-brand-red" />
+                <span className="font-semibold">
+                  {car.transmission === "Automatic" ? "Auto" : "Manual"}
+                </span>
+              </div>
+              <span className="w-1 h-1 rounded-full bg-white/30" />
+              <div className="flex items-center gap-1.5 text-xs">
+                <Fuel className="h-3.5 w-3.5 text-brand-red" />
+                <span className="font-semibold">{car.fuelType}</span>
+              </div>
             </div>
+
+            {/* Price */}
+            <div className="flex items-baseline justify-center gap-1 mb-5">
+              <span className="text-4xl font-black text-white tracking-tight">
+                ₱{car.pricePerDay.toLocaleString()}
+              </span>
+              <span className="text-sm text-gray-400 font-medium">/ day</span>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Dots */}
+        <div className="flex justify-center gap-1.5">
+          {featuredCars.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => go(i)}
+              aria-label={`Go to car ${i + 1}`}
+              className={`rounded-full transition-all duration-300 ${
+                i === index
+                  ? "w-7 h-1.5 bg-brand-red"
+                  : "w-1.5 h-1.5 bg-white/25 hover:bg-white/50"
+              }`}
+            />
           ))}
         </div>
-
-        {/* Controls */}
-        <div className="mt-4 flex items-center justify-between gap-2">
-          <button
-            onClick={prev}
-            aria-label="Previous car"
-            className="p-2 rounded-lg border border-gray-200 dark:border-white/10 hover:border-brand-red hover:text-brand-red text-gray-500 dark:text-gray-400 transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-
-          {/* Dot indicators */}
-          <div className="flex gap-1.5">
-            {featuredCars.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => go(i)}
-                aria-label={`Go to car ${i + 1}`}
-                className={`rounded-full transition-all duration-200 ${
-                  i === index
-                    ? "w-5 h-2 bg-brand-red"
-                    : "w-2 h-2 bg-gray-200 dark:bg-white/20 hover:bg-brand-red/50"
-                }`}
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={next}
-            aria-label="Next car"
-            className="p-2 rounded-lg border border-gray-200 dark:border-white/10 hover:border-brand-red hover:text-brand-red text-gray-500 dark:text-gray-400 transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* View details CTA */}
-        <Link
-          href={`/cars/${car.id}`}
-          className="mt-3 block w-full text-center py-2.5 rounded-xl border border-brand-red/30 text-brand-red hover:bg-brand-red hover:text-white text-sm font-semibold transition-all"
-        >
-          View Details
-        </Link>
       </div>
     </div>
   );
