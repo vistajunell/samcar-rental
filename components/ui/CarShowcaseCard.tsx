@@ -27,59 +27,38 @@ export default function CarShowcaseCard() {
   const next = () => go((index + 1) % total);
 
   const variants = {
-    enter: (d: number) => ({ x: d * 80, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: -d * 80, opacity: 0 }),
+    enter: (d: number) => ({ x: d * 100, opacity: 0, scale: 0.95 }),
+    center: { x: 0, opacity: 1, scale: 1 },
+    exit: (d: number) => ({ x: -d * 100, opacity: 0, scale: 0.95 }),
   };
 
   return (
-    <div className="relative w-full h-[520px]">
-      {/* ── Top: counter + status ── */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-2">
+    <div className="relative w-full">
+      {/* ── Top bar: status + counter ── */}
+      <div className="flex items-center justify-between mb-2 px-2 sm:px-4">
         <span
           className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md ${statusStyle[car.status]}`}
         >
           {car.status}
         </span>
-        <span className="text-[11px] font-semibold text-gray-300 tabular-nums tracking-wider">
+        <span className="text-[11px] font-semibold text-gray-400 tabular-nums tracking-[0.2em]">
           {String(index + 1).padStart(2, "0")}
-          <span className="text-gray-500 mx-0.5">/</span>
+          <span className="text-gray-600 mx-1">/</span>
           {String(total).padStart(2, "0")}
         </span>
       </div>
 
-      {/* ── Brand + name (above car) ── */}
-      <div className="absolute top-10 left-0 right-0 z-20 text-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${car.id}-name`}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.35 }}
-          >
-            <p className="text-[11px] text-brand-red font-bold uppercase tracking-[0.25em]">
-              {car.brand} · {car.year}
-            </p>
-            <h3 className="mt-1.5 text-3xl xl:text-4xl font-black text-white leading-tight tracking-tight">
-              {car.name}
-            </h3>
-            <p className="mt-1 text-xs text-gray-400 italic">{car.tagline}</p>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* ── Car image stage with podium glow ── */}
-      <div className="absolute top-32 left-0 right-0 bottom-44 flex items-center justify-center px-2">
-        {/* Red ring spotlight behind car */}
+      {/* ── Stage: huge car with side arrows ── */}
+      <div className="relative h-[280px] sm:h-[340px] lg:h-[400px] flex items-center justify-center px-12 sm:px-16">
+        {/* Soft red podium glow under car */}
         <div
           aria-hidden
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] rounded-full bg-brand-red/[0.12] blur-3xl animate-pulse-glow"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[60%] sm:w-[55%] h-6 rounded-full bg-brand-red/50 blur-2xl"
         />
-        {/* Podium ellipse glow */}
+        {/* Subtle radial behind car */}
         <div
           aria-hidden
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[72%] h-3 rounded-full bg-brand-red/40 blur-2xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full bg-brand-red/[0.06] blur-3xl"
         />
 
         <AnimatePresence mode="wait" custom={dir}>
@@ -90,93 +69,108 @@ export default function CarShowcaseCard() {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full h-full"
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full h-full max-w-[680px]"
           >
             <Image
               src={car.image}
               alt={`${car.brand} ${car.name}`}
               fill
               priority
-              sizes="(min-width: 1024px) 600px, 100vw"
-              className="object-contain drop-shadow-[0_28px_30px_rgba(0,0,0,0.65)]"
+              sizes="(min-width: 1024px) 680px, (min-width: 640px) 500px, 100vw"
+              className="object-contain drop-shadow-[0_30px_30px_rgba(0,0,0,0.7)]"
             />
           </motion.div>
         </AnimatePresence>
+
+        {/* Floating arrows */}
+        <button
+          onClick={prev}
+          aria-label="Previous car"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/[0.08] hover:bg-brand-red text-white border border-white/15 hover:border-brand-red backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          onClick={next}
+          aria-label="Next car"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/[0.08] hover:bg-brand-red text-white border border-white/15 hover:border-brand-red backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
       </div>
 
-      {/* ── Side arrows ── */}
-      <button
-        onClick={prev}
-        aria-label="Previous car"
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-brand-red text-white border border-white/20 hover:border-brand-red backdrop-blur-md flex items-center justify-center transition-all hover:scale-110"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      <button
-        onClick={next}
-        aria-label="Next car"
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-brand-red text-white border border-white/20 hover:border-brand-red backdrop-blur-md flex items-center justify-center transition-all hover:scale-110"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      {/* ── Bottom: specs + price + dots ── */}
-      <div className="absolute bottom-0 left-0 right-0 z-20">
-        {/* Specs row */}
+      {/* ── Info block (animated with car) ── */}
+      <div className="mt-4 lg:mt-6 text-center min-h-[140px]">
         <AnimatePresence mode="wait">
           <motion.div
-            key={`${car.id}-specs`}
-            initial={{ opacity: 0, y: 10 }}
+            key={`${car.id}-info`}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.35 }}
           >
-            <div className="flex items-center justify-center gap-5 mb-3 text-white">
-              <div className="flex items-center gap-1.5 text-xs">
-                <Users className="h-3.5 w-3.5 text-brand-red" />
+            <p className="text-[11px] text-brand-red font-bold uppercase tracking-[0.3em]">
+              {car.brand} · {car.year}
+            </p>
+            <h3 className="mt-1 text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight">
+              {car.name}
+            </h3>
+            <p className="mt-1 text-xs text-gray-500 italic">{car.tagline}</p>
+
+            {/* Specs row */}
+            <div className="mt-4 flex items-center justify-center gap-4 sm:gap-6 text-white">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <Users className="h-4 w-4 text-brand-red" />
                 <span className="font-semibold">{car.seats}</span>
-                <span className="text-gray-400">seats</span>
+                <span className="text-gray-500 hidden sm:inline">seats</span>
               </div>
               <span className="w-1 h-1 rounded-full bg-white/30" />
-              <div className="flex items-center gap-1.5 text-xs">
-                <Cog className="h-3.5 w-3.5 text-brand-red" />
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <Cog className="h-4 w-4 text-brand-red" />
                 <span className="font-semibold">
                   {car.transmission === "Automatic" ? "Auto" : "Manual"}
                 </span>
               </div>
               <span className="w-1 h-1 rounded-full bg-white/30" />
-              <div className="flex items-center gap-1.5 text-xs">
-                <Fuel className="h-3.5 w-3.5 text-brand-red" />
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <Fuel className="h-4 w-4 text-brand-red" />
                 <span className="font-semibold">{car.fuelType}</span>
+              </div>
+              <span className="hidden sm:inline w-1 h-1 rounded-full bg-white/30" />
+              <div className="hidden sm:flex items-baseline gap-1">
+                <span className="text-lg font-black text-white">
+                  ₱{car.pricePerDay.toLocaleString()}
+                </span>
+                <span className="text-xs text-gray-500">/day</span>
               </div>
             </div>
 
-            {/* Price */}
-            <div className="flex items-baseline justify-center gap-1 mb-5">
-              <span className="text-4xl font-black text-white tracking-tight">
+            {/* Mobile-only price */}
+            <div className="mt-2 sm:hidden flex items-baseline justify-center gap-1">
+              <span className="text-xl font-black text-white">
                 ₱{car.pricePerDay.toLocaleString()}
               </span>
-              <span className="text-sm text-gray-400 font-medium">/ day</span>
+              <span className="text-xs text-gray-500">/day</span>
             </div>
           </motion.div>
         </AnimatePresence>
+      </div>
 
-        {/* Dots */}
-        <div className="flex justify-center gap-1.5">
-          {featuredCars.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => go(i)}
-              aria-label={`Go to car ${i + 1}`}
-              className={`rounded-full transition-all duration-300 ${
-                i === index
-                  ? "w-7 h-1.5 bg-brand-red"
-                  : "w-1.5 h-1.5 bg-white/25 hover:bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
+      {/* ── Dot pagination ── */}
+      <div className="mt-5 flex justify-center gap-1.5 flex-wrap px-4">
+        {featuredCars.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => go(i)}
+            aria-label={`Go to car ${i + 1}`}
+            className={`rounded-full transition-all duration-300 ${
+              i === index
+                ? "w-7 h-1.5 bg-brand-red"
+                : "w-1.5 h-1.5 bg-white/25 hover:bg-white/50"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );
