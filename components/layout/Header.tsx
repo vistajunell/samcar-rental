@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import UserMenu from "@/components/layout/UserMenu";
+import { logoutAction } from "@/app/actions/auth";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -16,7 +18,14 @@ const navLinks = [
   { label: "Contact", href: "/#contact" },
 ];
 
-export default function Header() {
+export interface HeaderUser {
+  id: string;
+  email: string;
+  name: string;
+  role: "CUSTOMER" | "ADMIN";
+}
+
+export default function Header({ user }: { user: HeaderUser | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -50,7 +59,7 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* ── Desktop nav — fills available space ── */}
+          {/* ── Desktop nav ── */}
           <nav className="hidden lg:flex flex-1 items-center justify-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -67,19 +76,25 @@ export default function Header() {
           {/* ── Desktop CTAs ── */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
             <ThemeToggle />
-            <Link
-              href="/login"
-              className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-brand-red dark:hover:text-brand-red transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/book"
-              className="shine-btn inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-brand-red hover:bg-deep-red text-white text-sm font-bold transition-colors shadow-lg shadow-brand-red/25"
-            >
-              <span className="relative z-[2]">Book Now</span>
-              <ChevronRight className="relative z-[2] h-3.5 w-3.5" />
-            </Link>
+            {user ? (
+              <UserMenu user={user} />
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-brand-red dark:hover:text-brand-red transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/book"
+                  className="shine-btn inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-brand-red hover:bg-deep-red text-white text-sm font-bold transition-colors shadow-lg shadow-brand-red/25"
+                >
+                  <span className="relative z-[2]">Book Now</span>
+                  <ChevronRight className="relative z-[2] h-3.5 w-3.5" />
+                </Link>
+              </>
+            )}
           </div>
 
           {/* ── Mobile theme toggle + hamburger ── */}
@@ -118,20 +133,53 @@ export default function Header() {
                 </Link>
               ))}
               <div className="pt-3 mt-2 border-t border-black/[.06] dark:border-white/[.06] flex flex-col gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-3 text-sm font-semibold text-center text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/10 rounded-lg hover:border-brand-red hover:text-brand-red transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/book"
-                  onClick={() => setIsOpen(false)}
-                  className="shine-btn relative px-4 py-3 text-sm font-bold text-center bg-brand-red hover:bg-deep-red text-white rounded-lg transition-colors"
-                >
-                  <span className="relative z-[2]">Book Now</span>
-                </Link>
+                {user ? (
+                  <>
+                    <div className="px-4 py-2">
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                    {user.role === "ADMIN" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setIsOpen(false)}
+                        className="px-4 py-3 text-sm font-semibold text-center text-brand-red border border-brand-red/40 bg-brand-red/5 rounded-lg"
+                      >
+                        Admin Console
+                      </Link>
+                    )}
+                    <form action={logoutAction}>
+                      <button
+                        type="submit"
+                        className="w-full px-4 py-3 text-sm font-semibold text-center text-red-600 dark:text-red-400 border border-red-300 dark:border-red-500/40 rounded-lg flex items-center justify-center gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setIsOpen(false)}
+                      className="px-4 py-3 text-sm font-semibold text-center text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/10 rounded-lg hover:border-brand-red hover:text-brand-red transition-colors"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/book"
+                      onClick={() => setIsOpen(false)}
+                      className="shine-btn relative px-4 py-3 text-sm font-bold text-center bg-brand-red hover:bg-deep-red text-white rounded-lg transition-colors"
+                    >
+                      <span className="relative z-[2]">Book Now</span>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

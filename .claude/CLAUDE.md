@@ -2,361 +2,249 @@
 
 ## Project Overview
 
-Build a modern, fast, responsive car rental booking website for **SamCar Rental Lucena PH**.
+Modern, fast, responsive car rental booking website for **SamCar Rental Lucena PH** — a car rental service based in Lucena, Philippines.
 
-The website starts with a landing page first, then expands into authentication, database/API, car browsing, booking availability, admin dashboard, and final PayMongo automated payment integration.
-
-The business is a car rental service based in Lucena, Philippines.
-
-## Main Goals
-
-- Create a premium automotive-style website.
-- Support desktop and mobile layouts.
-- Avoid large margin gaps on left and right sides.
-- Make navigation fill the header properly instead of being compressed in the middle.
-- Start with the landing page as Phase 1.
-- Add authentication placeholders in Phase 1, but no real auth function yet.
-- Add database, API, authentication, booking, admin, and PayMongo in later phases.
-- Optimize for fast loading and smooth user experience.
+The build expands across six phases: Landing Page → Auth/DB Foundation → Car Browsing → Booking Logic → Admin Dashboard → PayMongo.
 
 ## Visual Theme
 
-Use the provided `theme-sample.jpg` as the design reference.
-
-Theme style:
-
-- bold
-- premium
-- sporty
-- automotive
-- clean
-- modern
-
-Color palette:
+Premium · bold · sporty · automotive · clean · modern.
 
 ```text
-Brand Red: #F41918
-Deep Red: #C71926
-Black: #000000
-Dark Gray: #333333
-Medium Gray: #646464
-White: #FFFFFF
+Brand Red:    #F41918
+Deep Red:     #C71926
+Black:        #000000
+Dark Gray:    #333333
+Medium Gray:  #646464
+White:        #FFFFFF
 ```
 
-The site must support:
+Both **dark mode** (default) and **light mode** are supported via class-based toggle on `<html>`.
 
-- dark mode
-- light mode
-
-Dark mode direction:
+## Tech Stack (locked in)
 
 ```text
-Black/dark background
-Red gradients
-White headings
-Gray body text
-Dark rounded cards
-Red CTA buttons
+Framework:    Next.js 16.2.4 (App Router, Turbopack)
+Language:     TypeScript 5
+React:        19.2.4
+Styling:      Tailwind CSS v4 (@theme blocks, no tailwind.config.js)
+Animation:    Framer Motion v12
+Icons:        lucide-react v1.14 (Facebook/Instagram brand icons removed → use inline SVGs)
+Forms:        Zod v4 (validation)
+ORM:          Prisma + Prisma Client
+Database:     SQLite for local dev, PostgreSQL for production (swap via DATABASE_URL)
+Auth:         Custom JWT (jose) + bcryptjs in httpOnly cookies
+Payment:      PayMongo (Phase 6)
+Calendar:     react-day-picker v9 (Phase 4)
+Deploy:       Vercel
 ```
 
-Light mode direction:
+> **Important**: Read `node_modules/next/dist/docs/` before writing Next.js code. Next.js 16 has breaking changes from training data — notably `middleware.ts` is now `proxy.ts`, and `cookies()` / `headers()` / `params` / `searchParams` are all async.
 
-```text
-White/off-white background
-Soft red accents
-Black headings
-Gray body text
-White rounded cards
-Red CTA buttons
-```
+## Responsive Layout Rules
 
-## Recommended Stack
-
-Use this stack unless instructed otherwise:
-
-```text
-Next.js App Router
-TypeScript
-Tailwind CSS
-shadcn/ui where useful
-lucide-react icons
-Framer Motion for subtle animations
-React DayPicker or FullCalendar later
-Prisma later
-PostgreSQL later
-NextAuth/Auth.js or custom auth later
-PayMongo later
-GitHub for version control
-Vercel for deployment
-```
-
-## Responsive Design Rules
-
-Always build mobile and desktop versions.
-
-Important rules:
-
-- No huge left/right margin gaps.
-- Use full-width sections with a controlled content container.
-- Avoid narrow centered layouts for the whole page.
-- Header navigation must use the available header width.
-- On desktop, logo should be left, navigation should spread naturally, and CTA/auth actions should be on the right.
-- On mobile, use hamburger menu or drawer.
-- Avoid horizontal scrolling on mobile.
-- Cards should stack correctly on mobile.
-- Hero should not look cramped or oversized.
-
-Recommended container style:
+- No huge left/right margin gaps. Use `max-w-7xl` content container, full-width sections.
+- Header navigation must fill the header width on desktop, hamburger drawer on mobile.
+- Hero stacks cleanly on mobile, never overflows horizontally.
+- Cards stack on small screens, buttons are touch-friendly (min 44px tap target).
 
 ```tsx
-<div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-  ...content
-</div>
+<div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">...</div>
 ```
 
-## Phase Plan
+---
 
-### Phase 1 — Landing Page Focus
+## Phase 1 — Landing Page ✅ COMPLETE
 
-Build the public landing page only.
+Built a premium luxury landing page with dark/light mode toggle, real car images, and shine hover effects.
 
-Include:
+**Files delivered:**
 
-- header/navigation
-- dark/light mode design
-- hero section
-- available car showcase slider
-- floating availability search box
-- featured cars section
-- how it works section
-- why choose us section
-- contact section
-- footer
-- clickable authentication/login placeholder
-
-Authentication should be visible and clickable only. It should not be fully functional yet.
-
-Use dummy car data.
-
-Do not build the real database yet.
-
-Do not integrate PayMongo yet.
-
-### Phase 2 — Authentication, Database, and API Foundation
-
-Add:
-
-- login/register pages
-- admin login
-- protected admin route foundation
-- Prisma
-- PostgreSQL
-- API routes if needed
-- schema for cars, bookings, payments, blocked dates, and users
-
-### Phase 3 — Car Browsing and Car Details
-
-Add:
-
-- browse cars page
-- car filtering
-- car details page
-- car gallery
-- car specs
-- 360 image rotation preview
-- calendar availability display
-
-### Phase 4 — Booking and Availability Logic
-
-Add:
-
-- start date/end date booking form
-- backend availability check
-- booking conflict rule
-- grace/maintenance day rule
-- pending booking expiration
-- booking status system
-
-Grace day example:
-
-```text
-Booked: May 2 to May 5
-Maintenance/grace day: May 6
-Next available: May 7
+```
+lib/data/cars.ts                         — 10 real cars (Vios XLE, Yaris ATIV, Veloz, Innova, Xpander, Montero, Mirage G4, Urvan, MG 5, Veloz V)
+components/providers/ThemeProvider.tsx   — Dark/light context, localStorage persistence
+components/ui/ThemeToggle.tsx            — Sun/Moon animated button
+components/layout/Header.tsx             — Sticky full-width nav with logo image
+components/layout/Footer.tsx             — 4-col footer, centered © 2026 line
+components/ui/CarShowcaseCard.tsx        — Big centered carousel with podium glow
+components/sections/HeroSection.tsx      — Centered luxury layout, no BG image, red glow accents
+components/sections/AvailabilityBar.tsx  — Floating horizontal search bar between Hero and Featured
+components/sections/FeaturedCars.tsx     — 6-card grid with real car images
+components/sections/HowItWorks.tsx       — 3-step section
+components/sections/WhyChooseUs.tsx      — 6-benefit grid
+components/sections/ContactSection.tsx   — Contact info + form
+app/globals.css                          — Tailwind v4 @theme, .shine-btn, class-based dark
+app/layout.tsx                           — ThemeProvider, no-flash inline script
+app/page.tsx                             — Composes all sections
+app/availability/page.tsx                — Placeholder (Phase 4 will replace)
+app/cars/page.tsx                        — Placeholder (Phase 3 will replace)
+public/images/logo/samcar-logo.webp      — Brand logo
+public/images/cars/*.webp                — 10 real car cutouts
 ```
 
-### Phase 5 — Admin Dashboard
+**Theme tokens (Tailwind v4 `@theme`):**
+- `bg-brand-red` / `text-brand-red` → `#F41918`
+- `bg-deep-red` / `text-deep-red` → `#C71926`
+- Class-based dark mode via `@custom-variant dark (&:where(.dark, .dark *))`
 
-Add:
+**Navigation order:** Home · Cars · About · How it Works · Availability · Contact (no Rates).
 
-- car management
-- booking management
-- manual blocked dates
-- payment tracking page
-- booking cancel/complete actions
+---
 
-### Phase 6 — PayMongo Automated Payment
+## Phase 2 — Auth, Database, and API Foundation 🚧 IN PROGRESS
 
-Add last:
+Goal: Real auth (login/register/admin login), Prisma + database, route protection, server actions.
 
-- PayMongo checkout/payment intent
-- QR Ph/GCash payment
-- webhook endpoint
-- webhook verification
-- idempotent payment confirmation
-- automatic booking confirmation after successful payment
+### Architecture decision: Custom JWT auth (not NextAuth)
 
-## Header Requirements
+Reason: simpler, fewer dependencies, easier to understand and debug. Stateless JWT in httpOnly cookies, signed with `jose` (works in both Node and Edge runtimes — required for `proxy.ts`).
 
-Desktop navigation should include:
+### Database choice: SQLite for dev, PostgreSQL for production
 
-```text
-Logo / SamCar Rental Lucena PH
-Home
-Browse Cars
-How It Works
-Rates
-Availability
-About Us
-Contact
-Book Now
-Login/Auth placeholder
+`DATABASE_URL=file:./dev.db` for local. Swap `provider` in `schema.prisma` and `DATABASE_URL` for prod. Prisma keeps the queries identical.
+
+### Files to deliver
+
+```
+prisma/
+  schema.prisma                 — User, Session?, Car, Booking, Payment, BlockedDate models
+  seed.ts                       — Seed admin user + insert featuredCars from lib/data/cars.ts
+  migrations/                   — Auto-generated by `prisma migrate dev`
+
+.env                            — DATABASE_URL, AUTH_SECRET (gitignored)
+.env.example                    — Committed template
+
+lib/
+  prisma.ts                     — Prisma client singleton (avoid multiple instances on hot reload)
+  auth/
+    config.ts                   — Cookie name, JWT options, session length
+    password.ts                 — hashPassword, verifyPassword (bcryptjs)
+    session.ts                  — createSession, getSession, destroySession (jose JWT)
+    schemas.ts                  — Zod: LoginSchema, RegisterSchema
+  dal.ts                        — Data Access Layer: getCurrentUser (cached), requireAuth, requireAdmin
+
+app/
+  actions/auth.ts               — Server actions: register, login, adminLogin, logout
+  login/page.tsx                — REPLACE placeholder (real form)
+  register/page.tsx             — NEW
+  admin/
+    login/page.tsx              — Admin login (separate flow from /login)
+    layout.tsx                  — Protected layout, calls requireAdmin()
+    page.tsx                    — Dashboard placeholder (Phase 5 fills)
+
+components/auth/
+  LoginForm.tsx                 — Client form, useActionState
+  RegisterForm.tsx              — Client form, useActionState
+  AdminLoginForm.tsx            — Client form, useActionState
+
+proxy.ts                        — Optimistic route protection (replaces middleware.ts in Next.js 16)
 ```
 
-Header behavior:
+### Auth behavior
 
-- sticky or fixed is okay
-- must fit desktop width properly
-- must not compress all nav items in the center
-- CTA should be clear
-- mobile should use hamburger menu
+- Customer session: 7 days
+- Cookie: `samcar-session` (httpOnly, sameSite=lax, secure in prod)
+- JWT payload: `{ userId, role }` — minimal, no PII
+- Role gates: `/admin/*` requires ADMIN, `/login` & `/register` redirect logged-in users away
+- Password: bcryptjs hash (cost 10)
 
-## Home Page Hero Requirements
+### Schema overview (Prisma)
 
-Hero should have 3 main areas:
-
-```text
-Left: intro text and buttons
-Center: floating availability search
-Right: car showcase slider
+```
+User          { id, email, password, name, phone?, role, createdAt, updatedAt, bookings[] }
+Car           { id, slug, brand, name, year, category, pricePerDay, seats, transmission,
+                fuelType, status, image, tagline?, description?, bookings[], blockedDates[] }
+Booking       { id, userId, carId, startDate, endDate, totalAmount, status,
+                expiresAt?, notes?, payments[] }
+Payment       { id, bookingId, amount, status, provider?, providerId?, paidAt? }
+BlockedDate   { id, carId, startDate, endDate, reason? }
 ```
 
-### Left Side
+Enums: `UserRole`, `BookingStatus`, `PaymentStatus`, `CarStatus`.
 
-Content:
+### What Phase 2 does NOT do
 
-```text
-Tagline: Affordable and Reliable Car Rental in Lucena
-Heading: Rent Your Ideal Car with SamCar Rental Lucena PH
-Body: Browse clean, well-maintained, and ready-to-drive rental cars for your travel needs in Lucena and nearby areas.
-Buttons: Browse Cars, Book Now
-```
+- No booking creation logic (Phase 4)
+- No PayMongo (Phase 6)
+- No admin dashboard UI (Phase 5)
+- No car browsing pages (Phase 3)
+- No password reset / email verification (post-launch)
 
-### Center Floating Availability Box
+---
 
-Fields:
+## Phase 3 — Car Browsing & Details
 
-```text
-Pick-up Date
-Return Date
-Seating Capacity: 2, 4, 5, 7, 10+
-Optional Transmission
-Check Availability button
-```
+Replace `/cars` and `/cars/[id]` placeholders with real DB-backed pages.
 
-Phase 1 behavior:
+- `/cars` page with filters (date range, seats, transmission, category, price)
+- `/cars/[slug]` car details page with gallery, specs, availability calendar
+- 360° image rotation preview
+- Pull car data from DB (seed contains the 10 cars from Phase 1)
+- API route for filter queries
 
-- clickable
-- can redirect to placeholder `/availability`
-- no real backend yet
+---
 
-### Right Car Slider
+## Phase 4 — Booking & Availability Logic
 
-Requirements:
+- Booking form: pickup/return dates, customer info
+- **Backend availability check** (frontend calendar is UX only)
+- Conflict prevention: confirmed bookings block their full range
+- **+1 day grace/maintenance** rule after each confirmed booking (May 2-5 booked → May 6 grace → May 7 available)
+- Pending booking expires after 15-30 minutes (cleanup via cron or on-read check)
+- Booking status: PENDING → CONFIRMED (after payment) → COMPLETED / CANCELLED
+- Replace `AvailabilityBar` form to actually search and create a pending booking
 
-- rounded card box
-- car image/head can slightly overflow outside card
-- left and right controls
-- swipe-friendly on mobile
-- show car name, price/day, seats, transmission, and availability status
+---
 
-## Sections After Hero
+## Phase 5 — Admin Dashboard
 
-Recommended Phase 1 homepage order:
+Build out `/admin/*` pages (Phase 2 just creates the empty protected shell):
 
-1. Header
-2. Hero section
-3. Featured Cars
-4. How It Works
-5. Why Choose Us
-6. Contact
-7. Footer
+- Car management: CRUD, upload images, set status
+- Booking management: view all, filter by status, cancel/complete
+- Manual blocked dates per car
+- Payment status tracking
+- Customer list
 
-Optional later sections:
+---
 
-- testimonials
-- car categories
-- availability preview
-- about section
+## Phase 6 — PayMongo Automated Payment
 
-## Booking Logic Rules for Later Phases
+- PayMongo checkout / payment intent creation
+- QR Ph / GCash payment support
+- Webhook endpoint with **signature verification**
+- **Idempotent** payment confirmation (never double-confirm a booking)
+- Booking auto-confirms only after webhook payment success
 
-When implemented:
-
-- always validate availability on backend
-- frontend calendar is only for user experience
-- confirmed bookings block their full date range
-- add 1 maintenance/grace day after each confirmed booking
-- pending bookings expire after 15–30 minutes
-- payment confirmation must be idempotent
-- never confirm booking twice if PayMongo webhook repeats
+---
 
 ## Performance Rules
 
-- Use Next/Image for images.
-- Keep car images optimized and compressed.
-- Lazy load non-critical sections.
-- Avoid heavy 3D model in Phase 1.
-- Use 360 image rotation later instead of heavy 3D first.
-- Avoid unnecessary libraries.
-- Keep animations subtle.
-- Use static dummy data first for landing page.
-- Split components cleanly.
+- Use `next/image` for all images (already done in Phase 1)
+- Lazy-load non-critical sections
+- Avoid heavy 3D — use 360° image frames instead (Phase 3)
+- Avoid unnecessary libraries
+- Subtle animations only (Framer Motion)
+- Split components cleanly, no mega-files
 
-## Expected Output From Claude/Codex
+## Phase 1 Acceptance ✅ All confirmed
 
-For every implementation task, provide:
+- ✅ Homepage loads correctly on desktop and mobile
+- ✅ No horizontal scroll, no huge side gaps
+- ✅ Navigation fills header naturally
+- ✅ Car carousel with real images works
+- ✅ Availability bar visible and responsive
+- ✅ Dark/light toggle functions correctly
+- ✅ Login button is placeholder-clickable (will become real in Phase 2)
+- ✅ Premium luxury feel matches reference
 
-1. What will be built
-2. Files to create/modify
-3. Exact code or patch
-4. Testing steps
-5. Notes for next phase
+## Phase 2 Acceptance (in progress)
 
-## Do Not Do Yet in Phase 1
-
-Do not add:
-
-- real authentication logic
-- database connection
-- PayMongo integration
-- booking payment logic
-- admin dashboard functionality
-- complex 3D models
-
-Only create placeholders/clickable links for future features.
-
-## Phase 1 Acceptance Checklist
-
-Before finishing Phase 1, confirm:
-
-- homepage loads correctly
-- desktop layout looks premium
-- mobile layout works cleanly
-- no horizontal scroll
-- no huge side margin gaps
-- navigation fills header width naturally
-- car slider layout works
-- availability box is visible and responsive
-- dark/light visual direction is applied
-- auth/login button is present but placeholder only
+- [ ] `npx prisma migrate dev` succeeds
+- [ ] `/register` creates a user, sets cookie, redirects to `/`
+- [ ] `/login` authenticates, sets cookie, redirects to `/`
+- [ ] Logged-in user accessing `/login` is bounced to `/`
+- [ ] `/admin` without admin session redirects to `/admin/login`
+- [ ] `/admin/login` with admin credentials redirects to `/admin`
+- [ ] `npx prisma db seed` creates an admin user (`admin@samcar.ph`)
+- [ ] `proxy.ts` enforces gates without DB calls (optimistic JWT verify only)

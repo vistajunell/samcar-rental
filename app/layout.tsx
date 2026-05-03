@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { getCurrentUser } from "@/lib/dal";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +30,11 @@ const themeInitScript = `
 })();
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getCurrentUser();
+
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
@@ -39,7 +42,18 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
-          <Header />
+          <Header
+            user={
+              user
+                ? {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                  }
+                : null
+            }
+          />
           {children}
           <Footer />
         </ThemeProvider>

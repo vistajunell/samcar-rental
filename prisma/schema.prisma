@@ -1,0 +1,146 @@
+// SamCar Rental — Prisma Schema
+// docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // SQLite for local dev. Swap to "postgresql" for production.
+  // Connection URL is configured in prisma.config.ts (Prisma 7 change).
+  provider = "sqlite"
+}
+
+// ──────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum CarStatus {
+  AVAILABLE
+  MAINTENANCE
+  RETIRED
+}
+
+enum CarCategory {
+  SEDAN
+  SUV
+  MPV
+  VAN
+}
+
+enum Transmission {
+  AUTOMATIC
+  MANUAL
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// ──────────────────────────────────────────────
+// Models
+// ──────────────────────────────────────────────
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String // bcrypt hash
+  name      String
+  phone     String?
+  role      UserRole  @default(CUSTOMER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+}
+
+model Car {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  brand        String
+  name         String
+  year         Int
+  category     CarCategory
+  pricePerDay  Float // PHP per day; switch to Decimal in PostgreSQL
+  seats        Int
+  transmission Transmission
+  fuelType     String
+  status       CarStatus     @default(AVAILABLE)
+  image        String // /images/cars/<slug>.webp
+  tagline      String?
+  description  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  bookings     Booking[]
+  blockedDates BlockedDate[]
+
+  @@index([status])
+  @@index([category])
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  userId      String
+  carId       String
+  startDate   DateTime
+  endDate     DateTime
+  totalAmount Float
+  status      BookingStatus @default(PENDING)
+  notes       String?
+  expiresAt   DateTime? // pending bookings expire (Phase 4)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car      Car       @relation(fields: [carId], references: [id], onDelete: Restrict)
+  payments Payment[]
+
+  @@index([userId])
+  @@index([carId])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  bookingId  String
+  amount     Float
+  status     PaymentStatus @default(PENDING)
+  provider   String? // "paymongo" later
+  providerId String? // PayMongo intent / source id
+  paidAt     DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([status])
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  carId     String
+  startDate DateTime
+  endDate   DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+  @@index([startDate, endDate])
+}
