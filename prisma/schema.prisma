@@ -8,7 +8,7 @@ generator client {
 datasource db {
   // SQLite for local dev. Swap to "postgresql" for production.
   // Connection URL is configured in prisma.config.ts (Prisma 7 change).
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ──────────────────────────────────────────────
