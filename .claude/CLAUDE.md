@@ -172,27 +172,113 @@ Enums: `UserRole`, `BookingStatus`, `PaymentStatus`, `CarStatus`.
 
 ---
 
-## Phase 3 — Car Browsing & Details
+## Phase 3 — Car Browsing & Details ✅ COMPLETE
 
-Replace `/cars` and `/cars/[id]` placeholders with real DB-backed pages.
+DB-backed `/cars` listing with URL-driven filters and `/cars/[slug]` detail pages.
 
-- `/cars` page with filters (date range, seats, transmission, category, price)
-- `/cars/[slug]` car details page with gallery, specs, availability calendar
-- 360° image rotation preview
-- Pull car data from DB (seed contains the 10 cars from Phase 1)
-- API route for filter queries
+**Files delivered:**
+
+```
+lib/queries/cars.ts                       — DB queries with React cache: getCars, getFeaturedCars,
+                                            getCarsForCarousel, getCarBySlug, getRelatedCars, getCarFacets
+                                            + CarUIView type and label translation (DB enums → UI labels)
+
+components/cars/CarFilters.tsx            — Client filter sidebar (URL-driven via useRouter.replace
+                                            inside startTransition — no full page reload)
+components/cars/CarListingCard.tsx        — Reusable card used by /cars grid, FeaturedCars, related
+
+app/cars/page.tsx                         — REPLACED placeholder. Server-rendered, parses + validates
+                                            searchParams, queries DB in parallel with facets,
+                                            grid + empty state + filters skeleton
+app/cars/[slug]/page.tsx                  — Car detail page: hero image stage, specs panel,
+                                            features list, availability calendar placeholder,
+                                            related cars by category + Reserve CTA
+app/cars/[slug]/not-found.tsx             — 404 page when slug doesn't exist
+```
+
+**Wired up:**
+- `app/page.tsx` → `async`, fetches via `getCarsForCarousel()` once and passes to children
+- `components/sections/HeroSection.tsx` → takes `cars` prop, forwards to `CarShowcaseCard`
+- `components/ui/CarShowcaseCard.tsx` → takes `cars` prop, no longer imports static data
+- `components/sections/FeaturedCars.tsx` → takes `cars` prop, uses `CarListingCard`
+- `components/sections/AvailabilityBar.tsx` → submits to `/cars?seats=…&transmission=…&pickup=…`
+  (dates carried in URL for Phase 4 to consume)
+
+**Filter semantics:** seats are matched as `gte` (so "5+ Seats" returns 5/7/8/15-seaters);
+category, transmission, max price are exact match; `q` searches brand + name (case-insensitive).
+Sort options: brand A–Z (default), price asc/desc, newest year.
+
+**What Phase 3 does NOT do (deferred):**
+- 360° rotation preview — requires multiple frames per car (not in seed assets)
+- Real availability check by date — Phase 4 (booking conflict / grace day rule)
+- Server-side pagination — fleet is 10 cars, not needed yet
 
 ---
 
-## Phase 4 — Booking & Availability Logic
+## Phase 4 — Booking & Availability Logic ✅ COMPLETE
 
-- Booking form: pickup/return dates, customer info
-- **Backend availability check** (frontend calendar is UX only)
-- Conflict prevention: confirmed bookings block their full range
-- **+1 day grace/maintenance** rule after each confirmed booking (May 2-5 booked → May 6 grace → May 7 available)
-- Pending booking expires after 15-30 minutes (cleanup via cron or on-read check)
-- Booking status: PENDING → CONFIRMED (after payment) → COMPLETED / CANCELLED
-- Replace `AvailabilityBar` form to actually search and create a pending booking
+End-to-end booking with backend availability check, +1-day grace rule, and 30-minute pending-hold TTL.
+
+**Files delivered:**
+
+```
+lib/queries/availability.ts             — getCarBlockedRanges, isCarAvailable,
+                                          getAvailableCarsInRange. Applies GRACE_DAYS=1
+                                          on top of confirmed + non-expired pending bookings,
+                                          plus admin BlockedDate entries.
+
+app/actions/booking.ts                  — createPendingBookingAction (zod-validated,
+                                          re-checks availability server-side, creates
+                                          PENDING booking with 30-min expiresAt) +
+                                          cancelBookingAction (owner / admin only).
+                                          Exposes computeTotal + countRentalDays.
+
+components/booking/BookingForm.tsx      — Client form: react-day-picker range mode,
+                                          disabled = blocked ranges + before today,
+                                          inline summary + Sign-in-required banner if not auth'd.
+components/booking/BookingSummary.tsx   — Price breakdown card (sticky on desktop)
+components/booking/CancelBookingButton.tsx — Two-step confirm cancel button
+components/availability/AvailabilityHeroForm.tsx — Inline date+filter form on /availability
+
+app/book/page.tsx                       — REPLACES placeholder. Fetches car + blocked ranges,
+                                          serializes Date→ISO across RSC boundary,
+                                          mounts BookingForm.
+app/availability/page.tsx               — REPLACES placeholder. Date-range search,
+                                          uses getAvailableCarsInRange, shows per-car total
+                                          for the chosen window, Reserve CTA forwards
+                                          dates into /book.
+app/bookings/page.tsx                   — User's booking list (active + past), requires auth.
+app/bookings/[id]/page.tsx              — Single booking detail with status banner,
+                                          PayMongo CTA (disabled until Phase 6),
+                                          owner-or-admin guard.
+```
+
+**Wired up:**
+- `AvailabilityBar` (home) → submits to `/availability` (was `/cars`)
+- `/cars/[slug]` → "Reserve This Car" already linked to `/book?car=<slug>`
+- `UserMenu` → "My Bookings" now links to `/bookings`
+- `globals.css` → themed react-day-picker (`.booking-day-picker`) for both light/dark
+
+**Booking flow:**
+1. User picks dates on `/availability` (or filters on `/cars`) → clicks Reserve
+2. Lands on `/book?car=<slug>&pickup=<date>&return=<date>` (auth-guarded)
+3. Calendar pre-fills selected range, blocked dates shown as struck-through disabled
+4. Submit → `createPendingBookingAction` re-checks availability server-side, creates booking
+5. Redirect to `/bookings/<id>` showing PENDING + countdown until expiry
+6. Pay button is disabled with tooltip "Phase 6 — PayMongo"
+
+**Availability rules implemented:**
+- CONFIRMED bookings block their full range + 1 grace day
+- Non-expired PENDING bookings also block (best-effort hold) + grace day
+- Admin BlockedDate entries block their range
+- Past dates always blocked (rejected client-side AND server-side)
+- Date math uses UTC midnight to avoid timezone drift
+
+**What Phase 4 does NOT do (deferred):**
+- Real charging (PayMongo wires up Phase 6) — bookings stay PENDING
+- Background cleanup of expired bookings (we filter them on read instead)
+- Email/SMS notifications on booking
+- Editing an existing booking (would-be Phase 5)
 
 ---
 

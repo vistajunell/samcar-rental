@@ -2,22 +2,31 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Users, Cog, Fuel } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { featuredCars } from "@/lib/data/cars";
+import type { CarUIView } from "@/lib/queries/cars";
 
 const statusStyle: Record<string, string> = {
   Available: "bg-green-500/15 text-green-300 border-green-500/40",
-  Booked: "bg-red-500/20 text-red-300 border-red-500/40",
   Maintenance: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
+  Retired: "bg-gray-500/20 text-gray-300 border-gray-500/40",
 };
 
-export default function CarShowcaseCard() {
+export default function CarShowcaseCard({ cars }: { cars: CarUIView[] }) {
   const [index, setIndex] = useState(0);
   const [dir, setDir] = useState(1);
 
-  const car = featuredCars[index];
-  const total = featuredCars.length;
+  if (cars.length === 0) {
+    return (
+      <div className="w-full text-center text-gray-400 py-16">
+        No cars available right now.
+      </div>
+    );
+  }
+
+  const car = cars[index] ?? cars[0];
+  const total = cars.length;
 
   const go = (next: number) => {
     setDir(next > index ? 1 : -1);
@@ -34,7 +43,7 @@ export default function CarShowcaseCard() {
 
   return (
     <div className="relative w-full">
-      {/* ── Top bar: status + counter ── */}
+      {/* Top bar */}
       <div className="flex items-center justify-between mb-2 px-2 sm:px-4">
         <span
           className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md ${statusStyle[car.status]}`}
@@ -48,14 +57,12 @@ export default function CarShowcaseCard() {
         </span>
       </div>
 
-      {/* ── Stage: huge car with side arrows ── */}
+      {/* Stage */}
       <div className="relative h-[280px] sm:h-[340px] lg:h-[400px] flex items-center justify-center px-12 sm:px-16">
-        {/* Soft red podium glow under car */}
         <div
           aria-hidden
           className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[60%] sm:w-[55%] h-6 rounded-full bg-brand-red/50 blur-2xl"
         />
-        {/* Subtle radial behind car */}
         <div
           aria-hidden
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full bg-brand-red/[0.06] blur-3xl"
@@ -83,7 +90,6 @@ export default function CarShowcaseCard() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Floating arrows */}
         <button
           onClick={prev}
           aria-label="Previous car"
@@ -100,8 +106,8 @@ export default function CarShowcaseCard() {
         </button>
       </div>
 
-      {/* ── Info block (animated with car) ── */}
-      <div className="mt-4 lg:mt-6 text-center min-h-[140px]">
+      {/* Info */}
+      <div className="mt-4 lg:mt-6 text-center min-h-[150px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${car.id}-info`}
@@ -116,9 +122,10 @@ export default function CarShowcaseCard() {
             <h3 className="mt-1 text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight">
               {car.name}
             </h3>
-            <p className="mt-1 text-xs text-gray-500 italic">{car.tagline}</p>
+            {car.tagline && (
+              <p className="mt-1 text-xs text-gray-500 italic">{car.tagline}</p>
+            )}
 
-            {/* Specs row */}
             <div className="mt-4 flex items-center justify-center gap-4 sm:gap-6 text-white">
               <div className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <Users className="h-4 w-4 text-brand-red" />
@@ -153,13 +160,21 @@ export default function CarShowcaseCard() {
               </span>
               <span className="text-xs text-gray-500">/day</span>
             </div>
+
+            {/* Details CTA */}
+            <Link
+              href={`/cars/${car.slug}`}
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-brand-red hover:text-white transition-colors uppercase tracking-wider"
+            >
+              View details <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* ── Dot pagination ── */}
+      {/* Dots */}
       <div className="mt-5 flex justify-center gap-1.5 flex-wrap px-4">
-        {featuredCars.map((_, i) => (
+        {cars.map((_, i) => (
           <button
             key={i}
             onClick={() => go(i)}

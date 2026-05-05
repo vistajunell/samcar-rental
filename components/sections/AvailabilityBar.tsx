@@ -5,11 +5,9 @@ import { useRouter } from "next/navigation";
 import { Calendar, Users, Cog, Search } from "lucide-react";
 
 const seatOptions = [
-  { value: "2", label: "2 Seats" },
-  { value: "4", label: "4 Seats" },
-  { value: "5", label: "5 Seats" },
-  { value: "7", label: "7 Seats" },
-  { value: "10+", label: "10+ Seats" },
+  { value: "5", label: "5+ Seats" },
+  { value: "7", label: "7+ Seats" },
+  { value: "10", label: "10+ Seats" },
 ];
 
 const transmissionOptions = [
@@ -39,6 +37,9 @@ export default function AvailabilityBar() {
     if (returnDate) params.set("return", returnDate);
     if (seats) params.set("seats", seats);
     if (transmission) params.set("transmission", transmission);
+    /* /availability is the date-aware listing — runs the real conflict /
+       grace-day check against the database. /cars stays as the
+       attribute-only browse page. */
     router.push(`/availability?${params.toString()}`);
   };
 

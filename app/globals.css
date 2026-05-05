@@ -106,3 +106,25 @@ body {
 /* Hide scrollbar utility (used by horizontal scroll on mobile) */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ──────────────────────────────────────────────
+   react-day-picker — themed to match brand
+   Used by /book BookingForm
+   ────────────────────────────────────────────── */
+.booking-day-picker .rdp-root {
+  --rdp-accent-color: var(--color-brand-red, #f41918);
+  --rdp-accent-background-color: rgba(244, 25, 24, 0.12);
+  --rdp-today-color: var(--color-brand-red, #f41918);
+  --rdp-day_button-border-radius: 8px;
+  --rdp-selected-border: 2px solid var(--rdp-accent-color);
+  --rdp-disabled-opacity: 0.35;
+}
+.dark .booking-day-picker .rdp-root {
+  --rdp-accent-background-color: rgba(244, 25, 24, 0.18);
+}
+.booking-day-picker .rdp-day {
+  font-size: 13px;
+}
+.booking-day-picker .rdp-day_disabled {
+  text-decoration: line-through;
+}

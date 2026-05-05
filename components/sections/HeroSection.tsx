@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, Star } from "lucide-react";
 import CarShowcaseCard from "@/components/ui/CarShowcaseCard";
+import type { CarUIView } from "@/lib/queries/cars";
 
 const stats = [
   { value: "10+", label: "Cars Available" },
@@ -8,7 +9,7 @@ const stats = [
   { value: "5★", label: "Rated Service" },
 ];
 
-export default function HeroSection() {
+export default function HeroSection({ cars }: { cars: CarUIView[] }) {
   return (
     <section className="relative overflow-hidden bg-black">
       {/* ── Atmospheric background (no image — pure dark with glow accents) ── */}
@@ -63,7 +64,7 @@ export default function HeroSection() {
 
         {/* Car showcase carousel */}
         <div className="relative mt-8 lg:mt-10 w-full max-w-5xl">
-          <CarShowcaseCard />
+          <CarShowcaseCard cars={cars} />
         </div>
 
         {/* Stats */}

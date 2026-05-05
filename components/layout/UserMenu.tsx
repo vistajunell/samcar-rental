@@ -99,12 +99,12 @@ export default function UserMenu({ user }: UserMenuProps) {
                 </Link>
               )}
               <Link
-                href="/account"
+                href="/bookings"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5"
               >
                 <User className="h-4 w-4 text-gray-400" />
-                My Account
+                My Bookings
               </Link>
             </div>
 

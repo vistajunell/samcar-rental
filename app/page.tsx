@@ -4,13 +4,16 @@ import FeaturedCars from "@/components/sections/FeaturedCars";
 import HowItWorks from "@/components/sections/HowItWorks";
 import WhyChooseUs from "@/components/sections/WhyChooseUs";
 import ContactSection from "@/components/sections/ContactSection";
+import { getCarsForCarousel } from "@/lib/queries/cars";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cars = await getCarsForCarousel();
+
   return (
     <main>
-      <HeroSection />
+      <HeroSection cars={cars} />
       <AvailabilityBar />
-      <FeaturedCars />
+      <FeaturedCars cars={cars.slice(0, 6)} />
       <HowItWorks />
       <WhyChooseUs />
       <ContactSection />
